@@ -3,25 +3,7 @@
 // -----------------------------------------------------------------------------
 // TicTacToe.cpp
 // -----------------------------------------------------------------------------
-// This file is intentionally *full of comments* and gentle TODOs that guide you
-// through wiring up a complete Tic‑Tac‑Toe implementation using the game engine’s
-// Bit / BitHolder grid system.
-//
-// Rules recap:
-//  - Two players place X / O on a 3x3 grid.
-//  - Players take turns; you can only place into an empty square.
-//  - First player to get three-in-a-row (row, column, or diagonal) wins.
-//  - If all 9 squares are filled and nobody wins, it’s a draw.
-//
-// Notes about the provided engine types you'll use here:
-//  - Bit              : a visual piece (sprite) that belongs to a Player
-//  - BitHolder        : a square on the board that can hold at most one Bit
-//  - Player           : the engine’s player object (you can ask who owns a Bit)
-//  - Game options     : let the mouse know the grid is 3x3 (rowX, rowY)
-//  - Helpers you’ll see used: setNumberOfPlayers, getPlayerAt, startGame, etc.
-//
-// I’ve already fully implemented PieceForPlayer() for you. Please leave that as‑is.
-// The rest of the routines are written as “comment-first” TODOs for you to complete.
+// This file was a 
 // -----------------------------------------------------------------------------
 
 const int AI_PLAYER   = 1;      // index of the AI player (O)
@@ -53,22 +35,19 @@ Bit* TicTacToe::PieceForPlayer(const int playerNumber)
 //
 void TicTacToe::setUpBoard()
 {
-    // set up 2 players and a 3 x 3 board
+    // set up 2 players
     setNumberOfPlayers(2);
+
+    // set game board & relevant sprites
     _gameOptions.rowX = 3, _gameOptions.rowY = 3;
     for (int i = 0; i < _gameOptions.rowX; i++) {
         for (int j = 0; j < _gameOptions.rowY; j++) {
-            _grid[i][j].initHolder(ImVec2((float)i*80, (float)j*80 + 10), "square.png", i, j);
-            std::cout << i << ", " << j << std::endl;
+            _grid[i][j].initHolder(ImVec2((float)i*90, (float)j*90 + 20), "square.png", i, j);
         }
     }
-
     startGame();
 }
 
-//
-// about the only thing we need to actually fill out for tic-tac-toe
-//
 bool TicTacToe::actionForEmptyHolder(BitHolder *holder)
 {
     // 1) Guard clause: if holder is nullptr, fail fast.
@@ -83,10 +62,7 @@ bool TicTacToe::actionForEmptyHolder(BitHolder *holder)
     Bit *new_bit = PieceForPlayer(num);
     new_bit->setPosition(holder->getPosition());
     holder->setBit(new_bit);
-    
-
-    // 4) Return whether we actually placed a piece. true = acted, false = ignored.
-    return true; // replace with true if you complete a successful placement    
+    return true;
 }
 
 bool TicTacToe::canBitMoveFrom(Bit *bit, BitHolder *src)
@@ -142,13 +118,14 @@ Player* TicTacToe::checkForWinner()
         if (ownerAt(WinningTriples[i][0]) != nullptr) {
 
             // if there is an owner, check if any of the winning triples share the same owner
+            // if so, return the owner of one of the squares
             if (ownerAt(WinningTriples[i][0]) == ownerAt(WinningTriples[i][1]) && ownerAt(WinningTriples[i][1]) == ownerAt(WinningTriples[i][2])) {
                 std::cout << WinningTriples[i][0] << WinningTriples[i][1] << WinningTriples[i][2] << std::endl;
                 return ownerAt(WinningTriples[i][0]);
             }
         }
-
     }
+    // return null if theres no winner
     return nullptr;
 }
 
@@ -156,16 +133,17 @@ bool TicTacToe::checkForDraw()
 {
     // is the board full with no winner?
     // if any square is empty, return false
-    // otherwise return true
     for (int i = 0; i < 9; i++) {
         // if there is a nullptr in any of the squares, the game isn't over
         if (ownerAt(i) == nullptr) {
+            std::cout << "keep goin" << std::endl;
             return false;
         }
     }
 
-    // if the board is full, but a winner can't be found, it's a draw!
+    // otherwise, if the board is full, but a winner can't be found, it's a draw!
     if (checkForWinner() != nullptr) {
+        std::cout << "player " << checkForWinner()->playerNumber() << ' won' << std::endl;
         return true;
     } else {
         return false;  // someone won- it's not a draw
