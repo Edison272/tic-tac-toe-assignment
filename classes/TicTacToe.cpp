@@ -3,7 +3,36 @@
 // -----------------------------------------------------------------------------
 // TicTacToe.cpp
 // -----------------------------------------------------------------------------
-// This file was a 
+/* This file was a derivative of the 'game.cpp' class, specifically designed to handle tic-tac-toe,
+and has specific override functions for the tic-tac-toe rules. The ONLY CHANGES in the code of this branch
+are in this file
+
+Changed Files:
+- setUpBoard()              - Sets up the tictactoe game by creating two players and a 3x3 grid
+- actionForEmptyHolder()    - Used to place pieces on the board; check if the bit exists, and if it's empty, and will place
+                              the active player's piece on the select bit if both conditionals are true. Returns true or false
+                              depending on if the piece placement was successful
+- stopGame()                - Clears out the board by interating through each bit on the 3x3 board, and clearing all associated
+                              memory with the destroyBit() function.
+- ownerAt()                 - A simple function to check the owner at a given point in the 3x3 board, given an int from 0-8.
+                              returns a pointer to a Player when there is an owner, otherwise it returns nullptr
+- checkForWinner()          - Checks for a winner by seeing if either player has made a winning triplet.
+                              This was done by iterating through an array containing a set of 3 bitHolder indexes, and checking
+                              if the owners for all bitHolders are the same. 
+                              Uses ownerAt for help.
+- checkForDraw()            - Is called to check if the board has reached a stalemate. If the board isn't full yet, returns false.
+                              If the board IS full, function returns false if a winner was found using checkForWinner(),
+                              and returns false otherwise
+- stateString()             - Returns a string based on the board state. Works by iterating through each bitHolder on the 3x3 board
+                              and adds a number to the string based on the owner of the bitHolder. '0' for an empty bit holder,
+                              '1' for an X, and '2' for a O.
+- setStateString            - Generates the board based on a given state string. Iterates through the stateString, and adjusts the
+                              data for the corresponding bitHolder accordingly. Places nothing in the bitHolder for '0' in the state string,
+                              an X in the bitHolder for '1', and places an O in the bitHolder for '2'.
+
+
+
+*/
 // -----------------------------------------------------------------------------
 
 const int AI_PLAYER   = 1;      // index of the AI player (O)
@@ -121,6 +150,7 @@ Player* TicTacToe::checkForWinner()
             // if so, return the owner of one of the squares
             if (ownerAt(WinningTriples[i][0]) == ownerAt(WinningTriples[i][1]) && ownerAt(WinningTriples[i][1]) == ownerAt(WinningTriples[i][2])) {
                 std::cout << WinningTriples[i][0] << WinningTriples[i][1] << WinningTriples[i][2] << std::endl;
+                std::cout << ownerAt(WinningTriples[i][0])->playerNumber() << std::endl;
                 return ownerAt(WinningTriples[i][0]);
             }
         }
@@ -142,10 +172,11 @@ bool TicTacToe::checkForDraw()
     }
 
     // otherwise, if the board is full, but a winner can't be found, it's a draw!
-    if (checkForWinner() != nullptr) {
-        std::cout << "player " << checkForWinner()->playerNumber() << ' won' << std::endl;
+    if (checkForWinner() == nullptr) {
+        std::cout << "draw" << std::endl;
         return true;
     } else {
+        std::cout << "player " << checkForWinner()->playerNumber() << ' won' << std::endl;
         return false;  // someone won- it's not a draw
     }
 }
