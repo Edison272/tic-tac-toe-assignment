@@ -33,22 +33,37 @@ namespace ClassGame {
                 if (!game) return;
                 if (!game->getCurrentPlayer()) return;
                 
+                // draw settings menu
                 ImGui::Begin("Settings");
                 ImGui::Text("Current Player Number: %d", game->getCurrentPlayer()->playerNumber());
                 ImGui::Text("Current Board State: %s", game->stateString().c_str());
 
+                ImGui::SeparatorText("AI Settings");
+                std::string toggle_ai_label = "Toggle AI | Currently " + std::string(game->_gameOptions.AIPlaying ? "On" : "Off");
+                if (ImGui::Button(toggle_ai_label.c_str())) {
+                    game->_gameOptions.AIPlaying = !game->_gameOptions.AIPlaying;
+                    game->setAIPlayer(1);
+                }
+
                 if (gameOver) {
+                    ImGui::SeparatorText("End of Game");
                     ImGui::Text("Game Over!");
-                    ImGui::Text("Winner: %d", gameWinner);
+                    if (gameWinner == -1) {
+                        ImGui::Text("===== Draw =====");
+                    } else {
+                        ImGui::Text("=== Winner: %d ===", gameWinner);
+                    }
                     if (ImGui::Button("Reset Game")) {
                         game->stopGame();
                         game->setUpBoard();
                         gameOver = false;
                         gameWinner = -1;
+                        game->_gameOptions.AIPlaying = false;
                     }
                 }
                 ImGui::End();
 
+                // draw game
                 ImGui::Begin("GameWindow");
                 game->drawFrame();
                 ImGui::End();

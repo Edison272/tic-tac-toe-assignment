@@ -4,8 +4,10 @@
 // TicTacToe.cpp
 // -----------------------------------------------------------------------------
 /* This file was a derivative of the 'game.cpp' class, specifically designed to handle tic-tac-toe,
-and has specific override functions for the tic-tac-toe rules. The ONLY CHANGES in the code of this branch
-are in this file
+and has specific override functions for the tic-tac-toe rules.
+
+Additionally, a portion of code has been uncommented in Game.cpp to enable AI players, and additional ImGui elements
+were added into Application.cpp
 
 Changed Files:
 - setUpBoard()              - Sets up the tictactoe game by creating two players and a 3x3 grid
@@ -20,15 +22,16 @@ Changed Files:
                               This was done by iterating through an array containing a set of 3 bitHolder indexes, and checking
                               if the owners for all bitHolders are the same. 
                               Uses ownerAt for help.
-- checkForDraw()            - Is called to check if the board has reached a stalemate. If the board isn't full yet, returns false.
-                              If the board IS full, function returns false if a winner was found using checkForWinner(),
-                              and returns false otherwise
+- checkForDraw()            - Is called to check if the board has reached a stalemate. If the board is full, it's a draw and returns
+                              true. Otherwise, returns false. No need to check for winner in checkForDraw() because application.cpp
+                              already checks for winner before checking for a draw.
 - stateString()             - Returns a string based on the board state. Works by iterating through each bitHolder on the 3x3 board
                               and adds a number to the string based on the owner of the bitHolder. '0' for an empty bit holder,
                               '1' for an X, and '2' for a O.
 - setStateString            - Generates the board based on a given state string. Iterates through the stateString, and adjusts the
                               data for the corresponding bitHolder accordingly. Places nothing in the bitHolder for '0' in the state string,
                               an X in the bitHolder for '1', and places an O in the bitHolder for '2'.
+- updateAI                  - has simple random tic-tac-toe AI.
 
 
 
@@ -40,10 +43,12 @@ const int HUMAN_PLAYER= 0;      // index of the human player (X)
 
 TicTacToe::TicTacToe()
 {
+    std::cout << "start" << std::endl;
 }
 
 TicTacToe::~TicTacToe()
 {
+    std::cout << "end" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -166,19 +171,11 @@ bool TicTacToe::checkForDraw()
     for (int i = 0; i < 9; i++) {
         // if there is a nullptr in any of the squares, the game isn't over
         if (ownerAt(i) == nullptr) {
-            std::cout << "keep goin" << std::endl;
             return false;
         }
     }
-
-    // otherwise, if the board is full, but a winner can't be found, it's a draw!
-    if (checkForWinner() == nullptr) {
-        std::cout << "draw" << std::endl;
-        return true;
-    } else {
-        std::cout << "player " << checkForWinner()->playerNumber() << ' won' << std::endl;
-        return false;  // someone won- it's not a draw
-    }
+    // board is full. Assuming check for winner was called before hand, this is a draw
+    return true;
 }
 
 //
@@ -252,6 +249,21 @@ int aiBoardWinner(std::string& state, int depth, int playerColor) {
 //
 void TicTacToe::updateAI() 
 {
+    // simple tic-tac-toe AI
+    std::string open = "";
+    for (int i = 0; i < 9; i++) {
+        if (ownerAt(i) == nullptr) {
+            open += char(i);
+        }
+    }
+
+    int index = open[rand() % open.length()];
+    int xcol = index % 3;
+    int ycol = index / 3;
+    BitHolder *holder = &_grid[ycol][xcol];
+    actionForEmptyHolder(holder);
+    endTurn();
+
     // we will implement the AI in the next assignment!
     // int bestMove = 1000;
     // int bestSquare = 1;
