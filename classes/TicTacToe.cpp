@@ -76,7 +76,7 @@ void TicTacToe::setUpBoard()
     _gameOptions.rowX = 3, _gameOptions.rowY = 3;
     for (int i = 0; i < _gameOptions.rowY; i++) {
         for (int j = 0; j < _gameOptions.rowX; j++) {
-            _grid[i][j].initHolder(ImVec2((float)i*95, (float)j*95 + 20), "square.png", i, j);
+            _grid[i][j].initHolder(ImVec2((float)j*100, (float)i*100 + 20), "square.png", j, i);
         }
     }
     startGame();
@@ -135,10 +135,10 @@ Player* TicTacToe::ownerAt(int index ) const
     int x = index % 3;
     // if there is no bit at that location (in _grid) return nullptr
     // otherwise return the owner of the bit at that location using getOwner()
-    if(!_grid[x][y].bit())  {
+    if(!_grid[y][x].bit())  {
         return nullptr;
     } else {
-        return _grid[x][y].bit()->getOwner(); 
+        return _grid[y][x].bit()->getOwner(); 
     }
 }
 
@@ -217,18 +217,25 @@ void TicTacToe::setStateString(const std::string &s)
     for (int i = 0; i < 9; i++) {
         int y = i / 3;
         int x = i % 3;
-        _grid[x][y].destroyBit();
+        _grid[y][x].destroyBit();
         if(s[i] == '1')  {
-            _grid[x][y].setBit(PieceForPlayer(1));  // index of 1 for player 1
+            _grid[y][x].setBit(PieceForPlayer(1));  // index of 1 for player 1
         } else if (s[i] == '2') {
-            _grid[x][y].setBit(PieceForPlayer(0));  // index of 2 for player 2/AI agent
+            _grid[y][x].setBit(PieceForPlayer(0));  // index of 2 for player 2/AI agent
         }
     }
 }
 
 bool aiBoardFull(const std::string& state) {
     // if no 0's are found, the board is full
-    return state.find('0') == std::string::npos;
+    for (int i = 0; i < 9; i++) {
+        // if there is a nullptr in any of the squares, the game isn't over
+        if (state[i] == '0') {
+            return false;
+        }
+    }
+    // board is full. Assuming check for winner was called before hand, this is a draw
+    return true;
 }
 
 int aiBoardWinner(std::string& state) {
@@ -287,18 +294,16 @@ void TicTacToe::updateAI()
         std::cout << bestSquare << std::endl;
         int xcol = bestSquare % 3;
         int ycol = bestSquare / 3;
-        BitHolder *holder = &_grid[xcol][ycol];
+        BitHolder *holder = &_grid[ycol][xcol];
         actionForEmptyHolder(holder);
         endTurn();
     }
 }
 
 int TicTacToe::megamax(std::string& state, int depth, int playerColor) {
-    int bestVal = -1000;
-    
     // terminal state - somebody won
     int boardWinner = aiBoardWinner(state);
-    if (boardWinner) {
+    if (boardWinner != 0) {
         // return value for scoring
         //std::cout << "consider winner " << -boardWinner << std::endl;
         return -boardWinner;
@@ -313,12 +318,14 @@ int TicTacToe::megamax(std::string& state, int depth, int playerColor) {
         return 0;
     }
 
+    int bestVal = -1000;
     // std::cout << "keep goin - " << state << std::endl;
     // branch out into the next possible board outcomes 
     for (int i = 0; i < 9; i++) {
         if (state[i] == '0') {
             state[i] = playerColor == HUMAN_PLAYER ? '1' : '2';
-            int result = -megamax(state, depth+1, -playerColor);
+            int nextPlayer = (playerColor == HUMAN_PLAYER) ? AI_PLAYER : HUMAN_PLAYER;
+            int result = -megamax(state, depth+1, nextPlayer);
             if (result > bestVal) {
                 bestVal = result;
             }
