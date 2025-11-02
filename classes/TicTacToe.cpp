@@ -31,7 +31,8 @@ Changed Files:
 - setStateString            - Generates the board based on a given state string. Iterates through the stateString, and adjusts the
                               data for the corresponding bitHolder accordingly. Places nothing in the bitHolder for '0' in the state string,
                               an X in the bitHolder for '1', and places an O in the bitHolder for '2'.
-- updateAI                  - has simple random tic-tac-toe AI.
+- updateAI                  - has simple random tic-tac-toe AI, though it's currently turned off
+                              The AI is now running on a minimax algorithm with alpha-beta pruning.
 
 
 
@@ -279,7 +280,7 @@ void TicTacToe::updateAI()
         if (state[i] == '0') {
             // use "states" to simulate the board
             state[i] = '2';
-            int result = -megamax(state, 0, HUMAN_PLAYER);
+            int result = -megamax(state, 0, HUMAN_PLAYER, -1000, 1000);
             std::cout << state << " | " << result << std::endl;
             if (result > bestMove) {
                 bestMove = result;
@@ -300,7 +301,7 @@ void TicTacToe::updateAI()
     }
 }
 
-int TicTacToe::megamax(std::string& state, int depth, int playerColor) {
+int TicTacToe::megamax(std::string& state, int depth, int playerColor, int alpha, int beta) {
     // terminal state - somebody won
     int boardWinner = aiBoardWinner(state);
     if (boardWinner != 0) {
@@ -325,11 +326,25 @@ int TicTacToe::megamax(std::string& state, int depth, int playerColor) {
         if (state[i] == '0') {
             state[i] = playerColor == HUMAN_PLAYER ? '1' : '2';
             int nextPlayer = (playerColor == HUMAN_PLAYER) ? AI_PLAYER : HUMAN_PLAYER;
-            int result = -megamax(state, depth+1, nextPlayer);
+            // swap alpha and beta and make them negative to switch perspectives on the board
+            int result = -megamax(state, depth+1, nextPlayer, -beta, -alpha);
+            state[i] = '0';
+
+            // get best result
             if (result > bestVal) {
                 bestVal = result;
             }
-            state[i] = '0';
+            
+            // retain the BEST score the of the curr player as alpha
+            if (bestVal > alpha) {
+                alpha = bestVal;
+            }
+
+            // "prune" this recursion, the opp has an advantage here
+            if (alpha >= beta) {
+                break;
+            }
+
         }
     }
     return bestVal;

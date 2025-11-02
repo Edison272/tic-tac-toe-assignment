@@ -36,6 +36,6 @@ private:
     Player*     ownerAt(int index ) const;
 
     Square      _grid[3][3];
-    int         megamax(std::string& state, int depth, int playerColor);
+    int         megamax(std::string& state, int depth, int playerColor, int alpha, int beta);
 };
 

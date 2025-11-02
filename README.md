@@ -28,3 +28,10 @@ So when a terminal state is reached, and the recursion must return the most adva
 since whatever is most advantagious for Player X is least advantagious for Player O. The program then finds the smallest score
 (greatest negative score), to decrease to the previous recursive call to minimze the opposing player's advantage.
 
+AB Pruning
+The alpha-pruning was simply a matter of adding a couple extra conditionals to the program to ensure that the recursion would stop after a certain point, so that the AI could save time. In this case, the minimax AI would be trying to see if a boardstate was worth pursuing if it would actually lead to a much more favorable outcome.
+
+The mimimax function was modified in the header file to include arguments for alpha and beta. When the minimax function is first called, alpha (favor current player) and beta (favor opposition) would be set to -1000 and 1000 respectively. In the same way the program flips the boardWinner values so it knows who the board win is in favor of, the alpha and beta values are switched and have their signs flipped with each recursion, so that the alpha-beta pruning is specific to either perspective
+
+The 'pruning' occurs during each loop within the recursion, where the minimax algorithm is testing every single board state, where alpha score will always be the boarstate score which has the highest potential. When the alpha scpre exceeds the beta score, it means that the AI has found a move which is better than the opposing player's best move. Because of this, the AI immediately breaks the loop (stop any further recursions) in order to save time
+
